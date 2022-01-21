@@ -3,6 +3,7 @@ services:
   n8n:
     image: n8nio/n8n
     restart: always
+    container_name: n8n
     networks:
       - traefik  
     labels:

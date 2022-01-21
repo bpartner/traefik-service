@@ -3,6 +3,7 @@ services:
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
+    container_name: gitlab
     #ports:
     #  - 8843:443
     networks:
