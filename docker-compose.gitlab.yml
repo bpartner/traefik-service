@@ -4,28 +4,17 @@ services:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
     container_name: gitlab
-    #ports:
-    #  - 8843:443
+    hostname: ${SUBDOMAIN_GITLAB}.${DOMAIN}
     networks:
       - traefik
+    healthcheck:
+      disable: true
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://${SUBDOMAIN_GITLAB}.${DOMAIN}'
-        nginx['redirect_http_to_https'] = true
-        nginx['listen_port'] = 443
-        nginx['listen_https'] = true
-        nginx['proxy_set_headers'] = {
-          'X-Forwarded-Proto' => 'https',
-          'X-Forwarded-Ssl' => 'on'
-        }
-        nginx['client_max_body_size'] = '2G'
-        sidekiq['concurrency'] = 15
-        postgresql['shared_buffers'] = "512MB"
-        gitlab_rails['artifacts_enabled'] = true
-        gitlab_rails['artifacts_path'] = "/var/opt/gitlab/gitlab-artifacts"
-        gitlab_rails['lfs_enabled'] = true
-        gitlab_rails['backup_keep_time'] = 172600
-        gitlab_ci['backup_keep_time'] = 172600
+        nginx['redirect_http_to_https'] = false
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
     volumes:
       - '${DATA_FOLDER}/.gitlab/config:/etc/gitlab'
       - '${DATA_FOLDER}/.gitlab/logs:/var/log/gitlab'
@@ -46,6 +35,10 @@ services:
       - traefik.http.middlewares.gitlab.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.gitlab.headers.STSPreload=true
       - traefik.http.routers.gitlab.service=gitlab
+      
+      - traefik.http.services.gitlab.loadbalancer.server.port=80
+      - traefik.http.services.gitlab.loadbalancer.server.scheme=http
+      - traefik.http.services.gitlab.loadbalancer.passhostheader=true
 networks:
   traefik:
     external: true
