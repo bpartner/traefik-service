@@ -1,0 +1,40 @@
+api:
+  insecure: true
+
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+  https:
+    address: ":443"
+
+http:
+  routers:
+    http-catchall:
+      rule: hostregexp(`{host:.+}`)
+      entrypoints:
+      - http
+      - https
+      
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+  file:
+    directory: /custom
+    watch: true
+
+certificatesResolvers:
+  letsEncrypt:
+    acme:
+      email: azinchenko@bpartner.com.ua
+      storage: /data/acme.json
+      ## Comment on Production
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: http

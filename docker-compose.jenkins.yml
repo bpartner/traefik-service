@@ -1,0 +1,30 @@
+version: '3'
+services:
+  jenkins:
+    # https://hub.docker.com/r/jenkins/jenkins/
+    image: jenkinsci/blueocean:latest
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - ${DATA_FOLDER}/.jenkins:/var/jenkins_home 
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - http_port=80
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jenkins.tls=true
+      - traefik.http.routers.jenkins.rule=Host(`${SUBDOMAIN_JENKINS}.${DOMAIN}`)
+      - traefik.http.routers.jenkins.entrypoints=http,https
+      - traefik.http.routers.jenkins.tls.certresolver=letsEncrypt
+      - traefik.http.middlewares.jenkins.headers.SSLRedirect=true
+      - traefik.http.middlewares.jenkins.headers.STSSeconds=315360000
+      - traefik.http.middlewares.jenkins.headers.browserXSSFilter=true
+      - traefik.http.middlewares.jenkins.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.jenkins.headers.forceSTSHeader=true
+      - traefik.http.middlewares.jenkins.headers.SSLHost=${DOMAIN}
+      - traefik.http.middlewares.jenkins.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.jenkins.headers.STSPreload=true
+networks:
+  traefik:
+    external: true

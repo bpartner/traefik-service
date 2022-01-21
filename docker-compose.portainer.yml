@@ -1,0 +1,27 @@
+version: '3'
+services:
+  portainer:
+    image: portainer/portainer
+    restart: always
+    networks:
+        - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA_FOLDER}/.portainer:/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.rule=Host(`${SUBDOMAIN_PORTAINER}.${DOMAIN}`)
+      - traefik.http.routers.portainer.entrypoints=http,https
+      - traefik.http.routers.portainer.tls.certresolver=letsEncrypt
+      - traefik.http.middlewares.portainer.headers.SSLRedirect=true
+      - traefik.http.middlewares.portainer.headers.STSSeconds=315360000
+      - traefik.http.middlewares.portainer.headers.browserXSSFilter=true
+      - traefik.http.middlewares.portainer.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.portainer.headers.forceSTSHeader=true
+      - traefik.http.middlewares.portainer.headers.SSLHost=${DOMAIN}
+      - traefik.http.middlewares.portainer.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.portainer.headers.STSPreload=true
+networks:
+  traefik:
+    external: true

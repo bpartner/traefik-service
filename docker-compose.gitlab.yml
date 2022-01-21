@@ -1,0 +1,50 @@
+version: '3.6'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    #ports:
+    #  - 8843:443
+    networks:
+      - traefik
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://${SUBDOMAIN_GITLAB}.${DOMAIN}'
+        nginx['redirect_http_to_https'] = true
+        nginx['listen_port'] = 443
+        nginx['listen_https'] = true
+        nginx['proxy_set_headers'] = {
+          'X-Forwarded-Proto' => 'https',
+          'X-Forwarded-Ssl' => 'on'
+        }
+        nginx['client_max_body_size'] = '2G'
+        sidekiq['concurrency'] = 15
+        postgresql['shared_buffers'] = "512MB"
+        gitlab_rails['artifacts_enabled'] = true
+        gitlab_rails['artifacts_path'] = "/var/opt/gitlab/gitlab-artifacts"
+        gitlab_rails['lfs_enabled'] = true
+        gitlab_rails['backup_keep_time'] = 172600
+        gitlab_ci['backup_keep_time'] = 172600
+    volumes:
+      - '${DATA_FOLDER}/.gitlab/config:/etc/gitlab'
+      - '${DATA_FOLDER}/.gitlab/logs:/var/log/gitlab'
+      - '${DATA_FOLDER}/.gitlab/data:/var/opt/gitlab'
+    shm_size: '256m'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gitlab.tls=true
+      - traefik.http.routers.gitlab.rule=Host(`${SUBDOMAIN_GITLAB}.${DOMAIN}`)
+      - traefik.http.routers.gitlab.entrypoints=http,https
+      - traefik.http.routers.gitlab.tls.certresolver=letsEncrypt
+      - traefik.http.middlewares.gitlab.headers.SSLRedirect=true
+      - traefik.http.middlewares.gitlab.headers.STSSeconds=315360000
+      - traefik.http.middlewares.gitlab.headers.browserXSSFilter=true
+      - traefik.http.middlewares.gitlab.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.gitlab.headers.forceSTSHeader=true
+      - traefik.http.middlewares.gitlab.headers.SSLHost=${DOMAIN}
+      - traefik.http.middlewares.gitlab.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.gitlab.headers.STSPreload=true
+      - traefik.http.routers.gitlab.service=gitlab
+networks:
+  traefik:
+    external: true
