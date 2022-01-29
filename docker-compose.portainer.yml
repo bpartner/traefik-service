@@ -1,7 +1,7 @@
 version: '3'
 services:
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer-ce:latest
     container_name: portainer
     restart: always
     networks:
@@ -9,10 +9,11 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DATA_FOLDER}/.portainer:/data
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.portainer.tls=true
-      - traefik.http.routers.portainer.rule=Host(`${SUBDOMAIN_PORTAINER}.${DOMAIN}`)
+    labels:      
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${SUBDOMAIN_PORTAINER}.${DOMAIN}`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.service=portainer"
       - traefik.http.routers.portainer.entrypoints=http,https
       - traefik.http.routers.portainer.tls.certresolver=letsEncrypt
       - traefik.http.middlewares.portainer.headers.SSLRedirect=true

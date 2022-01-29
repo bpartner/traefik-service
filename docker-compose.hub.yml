@@ -1,0 +1,29 @@
+version: '3'
+services:
+  hub:
+    image: registry:2
+    restart: always
+    container_name: hub
+    networks:
+      - traefik  
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hub.rule=Host(`${SUBDOMAIN_HUB}.${DOMAIN}`)
+      - traefik.http.routers.hub.tls=true
+      - traefik.http.routers.hub.entrypoints=http,https
+      - traefik.http.routers.hub.tls.certresolver=letsEncrypt
+      - traefik.http.middlewares.hub.headers.SSLRedirect=true
+      - traefik.http.middlewares.hub.headers.STSSeconds=315360000
+      - traefik.http.middlewares.hub.headers.browserXSSFilter=true
+      - traefik.http.middlewares.hub.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.hub.headers.forceSTSHeader=true
+      - traefik.http.middlewares.hub.headers.SSLHost=${DOMAIN}
+      - traefik.http.middlewares.hub.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.hub.headers.STSPreload=true
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data  
+    volumes:
+      - ${DATA_FOLDER}/.hub:/data
+networks:
+  traefik:
+    external: true     

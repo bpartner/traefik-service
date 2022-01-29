@@ -1,5 +1,5 @@
-up: traefik n8n monitor jenkins
-down: traefik-down n8n-down monitor-down jenkins-down
+up: traefik n8n monitor jenkins hub
+down: traefik-down n8n-down monitor-down jenkins-down hub-down
 restart: down up
 
 main: traefik monitor
@@ -24,10 +24,14 @@ gitlab: docker-gitlab-up
 gitlab-down: docker-gitlab-down
 gitlab-restart: gitlab-down gitlab-up
 
+hub: docker-hub-up
+hub-down: docker-hub-down
+hub-restart: hub-down hub-up
+
 
 
 docker-traefik-up:
-	docker-compose up -d
+	docker-compose up -d --force-recreate
 docker-traefik-down:
 	docker-compose down
 docker-n8n:
@@ -46,4 +50,8 @@ docker-gitlab-up:
 	docker-compose -f docker-compose.gitlab.yml up -d --force-recreate
 docker-gitlab-down:
 	docker-compose -f docker-compose.gitlab.yml down
+docker-hub-up:
+	docker-compose -f docker-compose.hub.yml up -d --force-recreate
+docker-hub-down:
+	docker-compose -f docker-compose.hub.yml down
 	
