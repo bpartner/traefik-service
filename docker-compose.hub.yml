@@ -22,8 +22,12 @@ services:
       - traefik.http.middlewares.hub.headers.STSPreload=true
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data  
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
     volumes:
-      - ${DATA_FOLDER}/.hub:/data
+      - ${DATA_FOLDER}/.hub/data:/var/lib/registry
+      - ${DATA_FOLDER}/.hub/auth:/auth
 networks:
   traefik:
     external: true     
