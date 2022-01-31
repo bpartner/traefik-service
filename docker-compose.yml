@@ -19,6 +19,7 @@ services:
       - ${DATA_FOLDER}/:/data
     labels:
       - traefik.enable=true
+      - traefik.pilot.token=${PILOT_TOKEN}
       - traefik.http.routers.traefik.tls=true
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.routers.traefik.rule=Host(`${SUBDOMAIN_TRAEFIK}.${DOMAIN}`)
