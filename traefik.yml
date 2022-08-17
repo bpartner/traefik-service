@@ -1,6 +1,7 @@
 api:
   insecure: true
-
+  dashboard: true
+  debug: true
 entryPoints:
   http:
     address: ":80"
@@ -26,8 +27,11 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
   file:
-    directory: /custom
+    directory: /custom/
     watch: true
+
+serversTransport:
+  insecureSkipVerify: true
 
 certificatesResolvers:
   letsEncrypt:
@@ -35,7 +39,8 @@ certificatesResolvers:
       email: azinchenko@bpartner.com.ua
       storage: /data/acme.json
       ## Comment on Production
-      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      ##caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: http
      

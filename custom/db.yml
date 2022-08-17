@@ -1,0 +1,15 @@
+http:
+  routers:
+    host:
+      entryPoints:
+        - https
+      rule: Host(`database.controller.pp.ua`)
+      service: database
+      tls:
+        certResolver: letsEncrypt
+  services:
+    database:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "https://10.10.11.13:8083"
